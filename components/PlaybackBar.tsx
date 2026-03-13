@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Platform, Pressable, Text, View } from 'react-native';
+import { useSettings } from '../contexts/SettingsContext';
 import { NarratorPicker } from './NarratorPicker';
 import { SpeedControl } from './SpeedControl';
 import type { Voice } from '../hooks/useTTS';
@@ -34,31 +35,38 @@ export const PlaybackBar: React.FC<PlaybackBarProps> = ({
   pitch,
   setPitch,
 }) => {
+  const { colors } = useSettings();
   const [expanded, setExpanded] = useState(false);
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
 
-  const handleSelectProfile = (profile: NarratorProfile, matchedVoice: Voice | null) => {
-    setSelectedProfileId(profile.id);
-    setSpeed(profile.speed);
-    setPitch(profile.pitch);
-    if (matchedVoice) {
-      onSelectVoice(matchedVoice);
-    }
-  };
+  const handleSelectProfile = useCallback(
+    (profile: NarratorProfile, matchedVoice: Voice | null) => {
+      setSelectedProfileId(profile.id);
+      setSpeed(profile.speed);
+      setPitch(profile.pitch);
+      if (matchedVoice) {
+        onSelectVoice(matchedVoice);
+      }
+    },
+    [onSelectVoice, setSpeed, setPitch]
+  );
 
-  const handleSelectRawVoice = (voice: Voice) => {
-    setSelectedProfileId(null);
-    onSelectVoice(voice);
-    setSpeed(1.0);
-    setPitch(1.0);
-  };
+  const handleSelectRawVoice = useCallback(
+    (voice: Voice) => {
+      setSelectedProfileId(null);
+      onSelectVoice(voice);
+      setSpeed(1.0);
+      setPitch(1.0);
+    },
+    [onSelectVoice, setSpeed, setPitch]
+  );
 
   return (
     <View
       style={{
-        backgroundColor: '#1A1B20',
+        backgroundColor: colors.surface,
         borderTopWidth: 1,
-        borderTopColor: '#2A2B30',
+        borderTopColor: colors.border,
         paddingBottom: Platform.OS === 'web' ? 0 : 8,
       }}
     >
@@ -94,7 +102,7 @@ export const PlaybackBar: React.FC<PlaybackBarProps> = ({
               justifyContent: 'center',
             }}
           >
-            <Text style={{ fontSize: 16, color: '#B0ADA5' }}>{'⏮'}</Text>
+            <Text style={{ fontSize: 16, color: colors.textSecondary }}>{'⏮'}</Text>
           </Pressable>
 
           <Pressable
@@ -103,14 +111,14 @@ export const PlaybackBar: React.FC<PlaybackBarProps> = ({
               width: 52,
               height: 52,
               borderRadius: 26,
-              backgroundColor: '#F5A623',
+              backgroundColor: colors.accent,
               alignItems: 'center',
               justifyContent: 'center',
               marginHorizontal: 6,
               elevation: 8,
             }}
           >
-            <Text style={{ fontSize: 20, color: '#0F1014' }}>
+            <Text style={{ fontSize: 20, color: colors.accentOnAccent }}>
               {isPlaying ? '⏸' : '▶️'}
             </Text>
           </Pressable>
@@ -125,7 +133,7 @@ export const PlaybackBar: React.FC<PlaybackBarProps> = ({
               justifyContent: 'center',
             }}
           >
-            <Text style={{ fontSize: 16, color: '#B0ADA5' }}>{'⏭'}</Text>
+            <Text style={{ fontSize: 16, color: colors.textSecondary }}>{'⏭'}</Text>
           </Pressable>
         </View>
 
@@ -133,14 +141,14 @@ export const PlaybackBar: React.FC<PlaybackBarProps> = ({
         <Pressable
           onPress={() => setExpanded(!expanded)}
           style={{
-            backgroundColor: '#242530',
+            backgroundColor: colors.surfaceAlt,
             borderRadius: 16,
             paddingHorizontal: 12,
             paddingVertical: 7,
             marginLeft: 8,
           }}
         >
-          <Text style={{ fontSize: 12, color: '#F5A623', fontWeight: '600' }}>
+          <Text style={{ fontSize: 12, color: colors.accent, fontWeight: '600' }}>
             {speed.toFixed(1)}x
           </Text>
         </Pressable>
@@ -151,7 +159,7 @@ export const PlaybackBar: React.FC<PlaybackBarProps> = ({
         <View
           style={{
             borderTopWidth: 1,
-            borderTopColor: '#2A2B30',
+            borderTopColor: colors.border,
             paddingVertical: 12,
             paddingHorizontal: 16,
           }}
@@ -160,7 +168,7 @@ export const PlaybackBar: React.FC<PlaybackBarProps> = ({
             style={{
               fontSize: 11,
               fontWeight: '600',
-              color: '#6B6866',
+              color: colors.textSecondary,
               marginBottom: 8,
               letterSpacing: 1,
             }}

@@ -41,8 +41,10 @@ npx expo start --web     # web
 - **Word-level highlighting** as each word is spoken
 - **Adjustable speed** (0.5x–3.0x) and **pitch** control
 - **Multi-format import** — PDF, EPUB, TXT (Kindle via Calibre conversion)
-- **Dark, Audible-inspired UI** with onboarding flow
-- **Settings** — Default voice, speed, theme, and font size
+- **Light & dark themes** with system preference support
+- **Settings** — Theme (light/dark/system), font size, default speed
+- **Onboarding flow** — 3-slide first-launch intro
+- **Audible-inspired UI**
 
 > **Note:** PDF text extraction works fully on web. On native (iOS/Android), PDF import shows a placeholder — use EPUB or TXT for best results on devices.
 
@@ -103,32 +105,36 @@ npx eas submit --platform ios
 
 ```
 app/
-  _layout.tsx           # Root layout, fonts, BookProvider, onboarding check
+  _layout.tsx           # Root layout, fonts, SettingsProvider, BookProvider, onboarding check
   onboarding.tsx        # First-launch onboarding (3 slides)
   (tabs)/
-    _layout.tsx        # Tab navigator (Library, Listen, Settings)
-    index.tsx          # Library screen
-    reader.tsx         # Reader with word highlighting
-    settings.tsx       # Settings screen
+    _layout.tsx         # Tab navigator (Library, Listen, Settings) + TTSProvider
+    index.tsx           # Library screen
+    reader.tsx          # Reader with word highlighting
+    settings.tsx        # Settings screen
 components/
-  BookCard.tsx         # Library book card
-  NarratorPicker.tsx   # Narrator profile dropdown
-  OnboardingSlide.tsx  # Reusable onboarding slide
-  PlaybackBar.tsx      # Transport controls
+  BookCard.tsx          # Library book card
+  NarratorPicker.tsx    # Narrator profile dropdown
+  OnboardingSlide.tsx   # Reusable onboarding slide
+  PlaybackBar.tsx       # Transport controls
   SpeedControl.tsx     # Speed presets
-  VoiceSelector.tsx    # Raw voice picker
-  WordHighlighter.tsx  # Word-level highlighting
+  VoiceSelector.tsx     # Raw voice picker
+  WordHighlighter.tsx   # Word-level highlighting
 contexts/
-  BookContext.tsx      # Global book state, loadFromFile, loadFromText
+  BookContext.tsx       # Global book state, loadFromFile, loadFromText
+  SettingsContext.tsx   # Theme, font size, speed persistence
+  TTSContext.tsx        # TTS state + sync with settings
+constants/
+  theme.ts              # Light/dark color palettes
 data/
-  freeBooks.ts         # 10 free classics + reading quotes
-  narratorProfiles.ts  # 12 narrator presets
+  freeBooks.ts          # 10 free classics + reading quotes
+  narratorProfiles.ts   # 12 narrator presets
 hooks/
-  useBook.ts           # Book context re-export
-  useLibrary.ts        # AsyncStorage library persistence
-  useTTS.ts            # TTS with pitch/speed (expo-speech + Web Speech API)
+  useBook.ts            # Book context re-export
+  useLibrary.ts         # AsyncStorage library persistence
+  useTTS.ts             # TTS with pitch/speed (expo-speech + Web Speech API)
 utils/
-  pdfParser.ts         # PDF extraction (web: pdfjs-dist)
-  epubParser.ts        # EPUB extraction (epub.js)
+  pdfParser.ts          # PDF extraction (web: pdfjs-dist)
+  epubParser.ts         # EPUB extraction (epub.js)
   textChunker.ts       # Sentence splitting for highlighting
 ```

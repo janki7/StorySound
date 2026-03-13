@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Pressable, ScrollView, Text, View, Platform } from 'react-native';
+import { useSettings } from '../contexts/SettingsContext';
 import { NARRATOR_PROFILES, CATEGORY_LABELS, NarratorProfile } from '../data/narratorProfiles';
 import type { Voice } from '../hooks/useTTS';
 
@@ -26,6 +27,7 @@ export const NarratorPicker: React.FC<NarratorPickerProps> = ({
   onSelectProfile,
   onSelectRawVoice,
 }) => {
+  const { colors } = useSettings();
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState<'narrators' | 'voices'>('narrators');
 
@@ -47,7 +49,7 @@ export const NarratorPicker: React.FC<NarratorPickerProps> = ({
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          backgroundColor: '#242530',
+          backgroundColor: colors.surfaceAlt,
           borderRadius: 20,
           paddingHorizontal: 14,
           paddingVertical: 8,
@@ -58,11 +60,11 @@ export const NarratorPicker: React.FC<NarratorPickerProps> = ({
         <Text style={{ fontSize: 16 }}>{currentIcon}</Text>
         <Text
           numberOfLines={1}
-          style={{ fontSize: 12, color: '#F5A623', fontWeight: '600', flexShrink: 1 }}
+          style={{ fontSize: 12, color: colors.accent, fontWeight: '600', flexShrink: 1 }}
         >
           {currentLabel}
         </Text>
-        <Text style={{ fontSize: 10, color: '#6B6866' }}>▼</Text>
+        <Text style={{ fontSize: 10, color: colors.textSecondary }}>▼</Text>
       </Pressable>
 
       {/* Modal picker */}
@@ -79,7 +81,7 @@ export const NarratorPicker: React.FC<NarratorPickerProps> = ({
           <Pressable
             onPress={(e) => e.stopPropagation()}
             style={{
-              backgroundColor: '#1A1B20',
+              backgroundColor: colors.surface,
               borderTopLeftRadius: 24,
               borderTopRightRadius: 24,
               maxHeight: '75%',
@@ -93,17 +95,17 @@ export const NarratorPicker: React.FC<NarratorPickerProps> = ({
                   width: 40,
                   height: 4,
                   borderRadius: 2,
-                  backgroundColor: '#3A3B40',
+                  backgroundColor: colors.surfaceAlt2,
                 }}
               />
             </View>
 
             {/* Title */}
             <View style={{ paddingHorizontal: 20, paddingBottom: 16 }}>
-              <Text style={{ fontSize: 20, fontWeight: '700', color: '#F0EFE9' }}>
+              <Text style={{ fontSize: 20, fontWeight: '700', color: colors.textPrimary }}>
                 Choose a Narrator
               </Text>
-              <Text style={{ fontSize: 13, color: '#6B6866', marginTop: 4 }}>
+              <Text style={{ fontSize: 13, color: colors.textSecondary, marginTop: 4 }}>
                 Pick a reading style or select a specific voice
               </Text>
             </View>
@@ -113,7 +115,7 @@ export const NarratorPicker: React.FC<NarratorPickerProps> = ({
               style={{
                 flexDirection: 'row',
                 marginHorizontal: 20,
-                backgroundColor: '#0F1014',
+                backgroundColor: colors.background,
                 borderRadius: 12,
                 padding: 3,
                 marginBottom: 16,
@@ -131,14 +133,14 @@ export const NarratorPicker: React.FC<NarratorPickerProps> = ({
                     paddingVertical: 10,
                     borderRadius: 10,
                     alignItems: 'center',
-                    backgroundColor: tab === key ? '#F5A623' : 'transparent',
+                    backgroundColor: tab === key ? colors.accent : 'transparent',
                   }}
                 >
                   <Text
                     style={{
                       fontSize: 13,
                       fontWeight: '600',
-                      color: tab === key ? '#0F1014' : '#6B6866',
+                      color: tab === key ? colors.accentOnAccent : colors.textSecondary,
                     }}
                   >
                     {label}
@@ -162,7 +164,7 @@ export const NarratorPicker: React.FC<NarratorPickerProps> = ({
                           style={{
                             fontSize: 11,
                             fontWeight: '600',
-                            color: '#6B6866',
+                            color: colors.textSecondary,
                             letterSpacing: 1,
                             marginBottom: 10,
                           }}
@@ -182,12 +184,12 @@ export const NarratorPicker: React.FC<NarratorPickerProps> = ({
                               style={{
                                 flexDirection: 'row',
                                 alignItems: 'center',
-                                backgroundColor: isActive ? 'rgba(245,166,35,0.12)' : '#242530',
+                                backgroundColor: isActive ? colors.accentBg : colors.surfaceAlt,
                                 borderRadius: 14,
                                 padding: 14,
                                 marginBottom: 8,
                                 borderWidth: isActive ? 1.5 : 0,
-                                borderColor: isActive ? '#F5A623' : 'transparent',
+                                borderColor: isActive ? colors.accent : 'transparent',
                               }}
                             >
                               <View
@@ -196,8 +198,8 @@ export const NarratorPicker: React.FC<NarratorPickerProps> = ({
                                   height: 44,
                                   borderRadius: 22,
                                   backgroundColor: isActive
-                                    ? 'rgba(245,166,35,0.2)'
-                                    : '#1A1B20',
+                                    ? colors.accentBg
+                                    : colors.surface,
                                   alignItems: 'center',
                                   justifyContent: 'center',
                                   marginRight: 14,
@@ -210,7 +212,7 @@ export const NarratorPicker: React.FC<NarratorPickerProps> = ({
                                   style={{
                                     fontSize: 15,
                                     fontWeight: '600',
-                                    color: isActive ? '#F5A623' : '#F0EFE9',
+                                    color: isActive ? colors.accent : colors.textPrimary,
                                   }}
                                 >
                                   {profile.name}
@@ -218,28 +220,28 @@ export const NarratorPicker: React.FC<NarratorPickerProps> = ({
                                 <Text
                                   style={{
                                     fontSize: 12,
-                                    color: '#6B6866',
+                                    color: colors.textSecondary,
                                     marginTop: 2,
                                   }}
                                 >
                                   {profile.description}
                                 </Text>
                                 <View style={{ flexDirection: 'row', gap: 8, marginTop: 6 }}>
-                                  <Text style={{ fontSize: 10, color: '#4A4843' }}>
+                                  <Text style={{ fontSize: 10, color: colors.textMuted }}>
                                     Speed: {profile.speed}x
                                   </Text>
-                                  <Text style={{ fontSize: 10, color: '#4A4843' }}>
+                                  <Text style={{ fontSize: 10, color: colors.textMuted }}>
                                     Pitch: {profile.pitch.toFixed(2)}
                                   </Text>
                                   {matched && (
-                                    <Text style={{ fontSize: 10, color: '#4A4843' }}>
+                                    <Text style={{ fontSize: 10, color: colors.textMuted }}>
                                       Voice: {matched.name.split(' - ')[0].split(' ').slice(1).join(' ')}
                                     </Text>
                                   )}
                                 </View>
                               </View>
                               {isActive && (
-                                <Text style={{ fontSize: 16, color: '#F5A623', marginLeft: 8 }}>
+                                <Text style={{ fontSize: 16, color: colors.accent, marginLeft: 8 }}>
                                   ✓
                                 </Text>
                               )}
@@ -256,7 +258,7 @@ export const NarratorPicker: React.FC<NarratorPickerProps> = ({
                     style={{
                       fontSize: 11,
                       fontWeight: '600',
-                      color: '#6B6866',
+                      color: colors.textSecondary,
                       letterSpacing: 1,
                       marginBottom: 10,
                     }}
@@ -275,12 +277,12 @@ export const NarratorPicker: React.FC<NarratorPickerProps> = ({
                         style={{
                           flexDirection: 'row',
                           alignItems: 'center',
-                          backgroundColor: isSelected ? 'rgba(245,166,35,0.12)' : '#242530',
+                          backgroundColor: isSelected ? colors.accentBg : colors.surfaceAlt,
                           borderRadius: 12,
                           padding: 12,
                           marginBottom: 6,
                           borderWidth: isSelected ? 1.5 : 0,
-                          borderColor: isSelected ? '#F5A623' : 'transparent',
+                          borderColor: isSelected ? colors.accent : 'transparent',
                         }}
                       >
                         <View
@@ -288,7 +290,7 @@ export const NarratorPicker: React.FC<NarratorPickerProps> = ({
                             width: 36,
                             height: 36,
                             borderRadius: 18,
-                            backgroundColor: '#1A1B20',
+                            backgroundColor: colors.surface,
                             alignItems: 'center',
                             justifyContent: 'center',
                             marginRight: 12,
@@ -302,17 +304,17 @@ export const NarratorPicker: React.FC<NarratorPickerProps> = ({
                             style={{
                               fontSize: 13,
                               fontWeight: isSelected ? '600' : '400',
-                              color: isSelected ? '#F5A623' : '#F0EFE9',
+                              color: isSelected ? colors.accent : colors.textPrimary,
                             }}
                           >
                             {voice.name}
                           </Text>
-                          <Text style={{ fontSize: 10, color: '#4A4843', marginTop: 1 }}>
+                          <Text style={{ fontSize: 10, color: colors.textMuted, marginTop: 1 }}>
                             {voice.lang}
                           </Text>
                         </View>
                         {isSelected && (
-                          <Text style={{ fontSize: 16, color: '#F5A623' }}>✓</Text>
+                          <Text style={{ fontSize: 16, color: colors.accent }}>✓</Text>
                         )}
                       </Pressable>
                     );

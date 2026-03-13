@@ -1,17 +1,30 @@
 import '../global.css';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { LogBox, Platform, useColorScheme } from 'react-native';
+import { LogBox, Platform } from 'react-native';
 import { useFonts, Lora_400Regular, Lora_500Medium } from '@expo-google-fonts/lora';
 import { View, ActivityIndicator } from 'react-native';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BookProvider } from '../contexts/BookContext';
+import { SettingsProvider, useSettings } from '../contexts/SettingsContext';
 
 const HAS_ONBOARDED_KEY = 'storysound.hasOnboarded';
 
+function ThemedAppContent() {
+  const { colors } = useSettings();
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <StatusBar style={colors.isDark ? 'light' : 'dark'} />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="onboarding" />
+        <Stack.Screen name="(tabs)" />
+      </Stack>
+    </View>
+  );
+}
+
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
   const segments = useSegments();
   const router = useRouter();
   const [checkingOnboarding, setCheckingOnboarding] = useState(true);
@@ -66,14 +79,10 @@ export default function RootLayout() {
   }
 
   return (
-    <BookProvider>
-      <View style={{ flex: 1, backgroundColor: '#0F1014' }}>
-        <StatusBar style="light" />
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="onboarding" />
-          <Stack.Screen name="(tabs)" />
-        </Stack>
-      </View>
-    </BookProvider>
+    <SettingsProvider>
+      <BookProvider>
+        <ThemedAppContent />
+      </BookProvider>
+    </SettingsProvider>
   );
 }

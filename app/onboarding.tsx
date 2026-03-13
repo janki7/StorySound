@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { View, ScrollView, Dimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import { useSettings } from '../contexts/SettingsContext';
 import { OnboardingSlide } from '../components/OnboardingSlide';
 
 const HAS_ONBOARDED_KEY = 'storysound.hasOnboarded';
 
 export default function OnboardingScreen() {
+  const { colors } = useSettings();
   const [index, setIndex] = useState(0);
   const router = useRouter();
   const width = Dimensions.get('window').width;
@@ -48,7 +50,7 @@ export default function OnboardingScreen() {
   ];
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#0F1014' }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <ScrollView
         horizontal
         pagingEnabled
@@ -65,6 +67,7 @@ export default function OnboardingScreen() {
               isLast={i === slides.length - 1}
               onNext={next}
               onSkip={skip}
+              colors={colors}
             />
           </View>
         ))}
@@ -89,7 +92,7 @@ export default function OnboardingScreen() {
               width: i === index ? 24 : 8,
               height: 8,
               borderRadius: 4,
-              backgroundColor: i === index ? '#F5A623' : '#2A2B30',
+              backgroundColor: i === index ? colors.accent : colors.surfaceAlt2,
             }}
           />
         ))}

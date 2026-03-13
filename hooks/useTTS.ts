@@ -46,6 +46,8 @@ export function useTTS(): TTSHook {
   const androidTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pitchRef = useRef(1);
 
+  const hasInitializedVoices = useRef(false);
+
   useEffect(() => {
     async function loadNativeVoices() {
       try {
@@ -58,7 +60,8 @@ export function useTTS(): TTSHook {
           nativeVoice: voice,
         }));
         setVoices(mapped);
-        if (!selectedVoice && mapped.length > 0) {
+        if (!hasInitializedVoices.current && mapped.length > 0) {
+          hasInitializedVoices.current = true;
           setSelectedVoice(mapped[0]);
         }
       } catch (e) {
@@ -80,7 +83,8 @@ export function useTTS(): TTSHook {
           nativeVoice: voice,
         }));
         setVoices(mapped);
-        if (!selectedVoice && mapped.length > 0) {
+        if (!hasInitializedVoices.current && mapped.length > 0) {
+          hasInitializedVoices.current = true;
           setSelectedVoice(mapped[0]);
         }
       };
@@ -94,7 +98,7 @@ export function useTTS(): TTSHook {
     } else {
       loadNativeVoices();
     }
-  }, [selectedVoice]);
+  }, []);
 
   useEffect(
     () => () => {

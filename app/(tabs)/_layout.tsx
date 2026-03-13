@@ -1,7 +1,10 @@
 import { Tabs } from 'expo-router';
 import { View, Text, Platform } from 'react-native';
+import { TTSProvider } from '../../contexts/TTSContext';
+import { useSettings } from '../../contexts/SettingsContext';
 
 function TabIcon({ label, icon, focused }: { label: string; icon: string; focused: boolean }) {
+  const { colors } = useSettings();
   return (
     <View style={{ alignItems: 'center', justifyContent: 'center', paddingTop: 6 }}>
       <Text style={{ fontSize: 20, marginBottom: 2, opacity: focused ? 1 : 0.5 }}>{icon}</Text>
@@ -9,7 +12,7 @@ function TabIcon({ label, icon, focused }: { label: string; icon: string; focuse
         style={{
           fontSize: 10,
           fontWeight: focused ? '600' : '400',
-          color: focused ? '#F5A623' : '#9E9B93',
+          color: focused ? colors.accent : colors.tabBarInactive,
           letterSpacing: 0.3,
         }}
       >
@@ -20,20 +23,22 @@ function TabIcon({ label, icon, focused }: { label: string; icon: string; focuse
 }
 
 export default function TabsLayout() {
+  const { colors } = useSettings();
   return (
+    <TTSProvider>
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
         tabBarStyle: {
           height: Platform.OS === 'web' ? 68 : 78,
-          backgroundColor: '#1A1B20',
-          borderTopColor: '#2A2B30',
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
           borderTopWidth: 1,
           paddingBottom: Platform.OS === 'web' ? 8 : 16,
         },
-        tabBarActiveTintColor: '#F5A623',
-        tabBarInactiveTintColor: '#9E9B93',
+        tabBarActiveTintColor: colors.accent,
+        tabBarInactiveTintColor: colors.tabBarInactive,
       }}
     >
       <Tabs.Screen
@@ -61,5 +66,6 @@ export default function TabsLayout() {
         }}
       />
     </Tabs>
+    </TTSProvider>
   );
 }

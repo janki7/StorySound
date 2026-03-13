@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -12,11 +12,14 @@ import { useRouter } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
 import { useLibrary } from '../../hooks/useLibrary';
 import { useBookContext } from '../../contexts/BookContext';
+import { useSettings } from '../../contexts/SettingsContext';
 import { BookCard } from '../../components/BookCard';
 import { FREE_BOOKS, READING_QUOTES, FreeBook } from '../../data/freeBooks';
+import type { LibraryBook } from '../../hooks/useLibrary';
 
 export default function LibraryScreen() {
   const router = useRouter();
+  const { colors } = useSettings();
   const { books, loading, addBook, removeBook } = useLibrary();
   const { loadFromFile, loadFromText, currentBook } = useBookContext();
   const [loadingFreeBook, setLoadingFreeBook] = useState<string | null>(null);
@@ -25,6 +28,32 @@ export default function LibraryScreen() {
     const idx = Math.floor(Date.now() / 86400000) % READING_QUOTES.length;
     return READING_QUOTES[idx];
   }, []);
+
+  const handleOpenBook = useCallback(
+    async (item: LibraryBook) => {
+      if (currentBook?.id !== item.id) {
+        const fetchUri = item.uri.startsWith('https://www.gutenberg.org')
+          ? `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(item.uri)}`
+          : item.uri;
+        await loadFromFile({
+          uri: fetchUri,
+          name: `${item.title}.${item.type}`,
+        });
+      }
+      router.push({
+        pathname: '/(tabs)/reader',
+        params: { bookId: item.id },
+      });
+    },
+    [currentBook?.id, loadFromFile, router]
+  );
+
+  const handleRemoveBook = useCallback(
+    (id: string) => {
+      removeBook(id);
+    },
+    [removeBook]
+  );
 
   const importBook = async () => {
     try {
@@ -62,22 +91,6 @@ export default function LibraryScreen() {
     } catch (e) {
       console.warn('Import failed', e);
     }
-  };
-
-  const handleOpenBook = async (item: (typeof books)[number]) => {
-    if (currentBook?.id !== item.id) {
-      const fetchUri = item.uri.startsWith('https://www.gutenberg.org')
-        ? `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(item.uri)}`
-        : item.uri;
-      await loadFromFile({
-        uri: fetchUri,
-        name: `${item.title}.${item.type}`,
-      });
-    }
-    router.push({
-      pathname: '/(tabs)/reader',
-      params: { bookId: item.id },
-    });
   };
 
   const handleFreeBook = async (book: FreeBook) => {
@@ -118,7 +131,7 @@ export default function LibraryScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#0F1014' }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: 100 }}
@@ -140,13 +153,13 @@ export default function LibraryScreen() {
               style={{
                 fontSize: 28,
                 fontWeight: '800',
-                color: '#F0EFE9',
+                color: colors.textPrimary,
                 letterSpacing: -0.5,
               }}
             >
               StorySound
             </Text>
-            <Text style={{ fontSize: 13, color: '#6B6866', marginTop: 2 }}>
+            <Text style={{ fontSize: 13, color: colors.textSecondary, marginTop: 2 }}>
               Your audiobook companion
             </Text>
           </View>
@@ -156,13 +169,13 @@ export default function LibraryScreen() {
               width: 44,
               height: 44,
               borderRadius: 22,
-              backgroundColor: '#F5A623',
+              backgroundColor: colors.accent,
               alignItems: 'center',
               justifyContent: 'center',
               elevation: 8,
             }}
           >
-            <Text style={{ fontSize: 24, color: '#0F1014', fontWeight: '700', marginTop: -2 }}>
+            <Text style={{ fontSize: 24, color: colors.accentOnAccent, fontWeight: '700', marginTop: -2 }}>
               +
             </Text>
           </Pressable>
@@ -174,17 +187,17 @@ export default function LibraryScreen() {
             marginHorizontal: 20,
             marginTop: 16,
             marginBottom: 24,
-            backgroundColor: '#1A1B20',
+            backgroundColor: colors.surface,
             borderRadius: 16,
             padding: 18,
             borderLeftWidth: 3,
-            borderLeftColor: '#F5A623',
+            borderLeftColor: colors.accent,
           }}
         >
           <Text
             style={{
               fontSize: 13,
-              color: '#B0ADA5',
+              color: colors.textSecondary,
               lineHeight: 20,
               fontStyle: 'italic',
             }}
@@ -203,9 +216,9 @@ export default function LibraryScreen() {
               marginBottom: 14,
             }}
           >
-            <Text style={{ fontSize: 20, fontWeight: '700', color: '#F0EFE9' }}>My Library</Text>
+            <Text style={{ fontSize: 20, fontWeight: '700', color: colors.textPrimary }}>My Library</Text>
             {books.length > 0 && (
-              <Text style={{ fontSize: 12, color: '#6B6866' }}>
+              <Text style={{ fontSize: 12, color: colors.textSecondary }}>
                 {books.length} book{books.length !== 1 ? 's' : ''}
               </Text>
             )}
@@ -214,18 +227,18 @@ export default function LibraryScreen() {
 
         {loading ? (
           <View style={{ padding: 40, alignItems: 'center' }}>
-            <ActivityIndicator color="#F5A623" />
+            <ActivityIndicator color={colors.accent} />
           </View>
         ) : books.length === 0 ? (
-          <View
-            style={{
-              marginHorizontal: 20,
-              backgroundColor: '#1A1B20',
+            <View
+              style={{
+                marginHorizontal: 20,
+                backgroundColor: colors.surface,
               borderRadius: 16,
               padding: 32,
               alignItems: 'center',
               borderWidth: 1,
-              borderColor: '#2A2B30',
+                borderColor: colors.surfaceAlt2,
               borderStyle: 'dashed',
             }}
           >
@@ -234,7 +247,7 @@ export default function LibraryScreen() {
               style={{
                 fontSize: 16,
                 fontWeight: '600',
-                color: '#F0EFE9',
+                color: colors.textPrimary,
                 marginBottom: 6,
               }}
             >
@@ -243,7 +256,7 @@ export default function LibraryScreen() {
             <Text
               style={{
                 fontSize: 13,
-                color: '#6B6866',
+                color: colors.textSecondary,
                 textAlign: 'center',
                 marginBottom: 20,
                 lineHeight: 19,
@@ -257,10 +270,10 @@ export default function LibraryScreen() {
                 paddingHorizontal: 28,
                 paddingVertical: 13,
                 borderRadius: 25,
-                backgroundColor: '#F5A623',
+                backgroundColor: colors.accent,
               }}
             >
-              <Text style={{ fontSize: 15, fontWeight: '700', color: '#0F1014' }}>
+              <Text style={{ fontSize: 15, fontWeight: '700', color: colors.accentOnAccent }}>
                 Import a Book
               </Text>
             </Pressable>
@@ -279,8 +292,9 @@ export default function LibraryScreen() {
                 title={item.title}
                 author={item.author}
                 progress={item.progressSentence > 0 ? 0.5 : 0}
-                onPress={() => handleOpenBook(item)}
-                onLongPress={() => removeBook(item.id)}
+                book={item}
+                onOpenBook={handleOpenBook}
+                onRemoveBook={handleRemoveBook}
               />
             ))}
           </View>
@@ -298,10 +312,10 @@ export default function LibraryScreen() {
             }}
           >
             <View>
-              <Text style={{ fontSize: 20, fontWeight: '700', color: '#F0EFE9' }}>
+              <Text style={{ fontSize: 20, fontWeight: '700', color: colors.textPrimary }}>
                 Free Classics
               </Text>
-              <Text style={{ fontSize: 12, color: '#6B6866', marginTop: 3 }}>
+              <Text style={{ fontSize: 12, color: colors.textSecondary, marginTop: 3 }}>
                 Tap to listen instantly · Powered by Project Gutenberg
               </Text>
             </View>
@@ -323,16 +337,16 @@ export default function LibraryScreen() {
                       right: 12,
                       bottom: 0,
                       zIndex: 10,
-                      backgroundColor: 'rgba(0,0,0,0.5)',
+                      backgroundColor: 'rgba(0,0,0,0.5)' as const,
                       borderRadius: 12,
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}
                   >
-                    <ActivityIndicator color="#F5A623" />
+                    <ActivityIndicator color={colors.accent} />
                     <Text
                       style={{
-                        color: '#F5A623',
+                        color: colors.accent,
                         fontSize: 11,
                         marginTop: 8,
                         fontWeight: '600',
@@ -361,13 +375,13 @@ export default function LibraryScreen() {
                 >
                   <View
                     style={{
-                      backgroundColor: '#242530',
+                      backgroundColor: colors.surfaceAlt,
                       paddingHorizontal: 7,
                       paddingVertical: 2,
                       borderRadius: 6,
                     }}
                   >
-                    <Text style={{ fontSize: 9, color: '#6B6866', fontWeight: '600' }}>
+                    <Text style={{ fontSize: 9, color: colors.textSecondary, fontWeight: '600' }}>
                       {book.genre}
                     </Text>
                   </View>
@@ -383,12 +397,12 @@ export default function LibraryScreen() {
           style={{
             marginTop: 32,
             marginHorizontal: 20,
-            backgroundColor: '#1A1B20',
+            backgroundColor: colors.surface,
             borderRadius: 16,
             padding: 20,
           }}
         >
-          <Text style={{ fontSize: 14, fontWeight: '600', color: '#F0EFE9', marginBottom: 12 }}>
+          <Text style={{ fontSize: 14, fontWeight: '600', color: colors.textPrimary, marginBottom: 12 }}>
             Supported formats
           </Text>
           <View style={{ flexDirection: 'row', gap: 10 }}>
@@ -397,7 +411,7 @@ export default function LibraryScreen() {
                 key={fmt}
                 style={{
                   flex: 1,
-                  backgroundColor: '#242530',
+                  backgroundColor: colors.surfaceAlt,
                   borderRadius: 10,
                   paddingVertical: 12,
                   alignItems: 'center',
@@ -406,7 +420,7 @@ export default function LibraryScreen() {
                 <Text style={{ fontSize: 18, marginBottom: 4 }}>
                   {fmt === 'PDF' ? '📄' : fmt === 'EPUB' ? '📕' : '📝'}
                 </Text>
-                <Text style={{ fontSize: 12, fontWeight: '600', color: '#B0ADA5' }}>{fmt}</Text>
+                <Text style={{ fontSize: 12, fontWeight: '600', color: colors.textSecondary }}>{fmt}</Text>
               </View>
             ))}
           </View>

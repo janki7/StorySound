@@ -5,8 +5,12 @@ export interface BookCardProps {
   title: string;
   author?: string;
   progress: number;
-  onPress: () => void;
+  onPress?: () => void;
   onLongPress?: () => void;
+  /** When provided with onOpenBook, enables memo-friendly callback pattern */
+  book?: { id: string };
+  onOpenBook?: (book: { id: string }) => void;
+  onRemoveBook?: (id: string) => void;
   color1?: string;
   color2?: string;
   compact?: boolean;
@@ -29,16 +33,21 @@ function hashString(str: string): number {
   return Math.abs(hash);
 }
 
-export const BookCard: React.FC<BookCardProps> = ({
+export const BookCard = React.memo<BookCardProps>(({
   title,
   author,
   progress,
   onPress,
   onLongPress,
+  book,
+  onOpenBook,
+  onRemoveBook,
   color1,
   color2,
   compact,
 }) => {
+  const handlePress = onOpenBook && book ? () => onOpenBook(book) : onPress;
+  const handleLongPress = onRemoveBook && book ? () => onRemoveBook(book.id) : onLongPress;
   const percentage = Math.round(progress * 100);
   const idx = hashString(title) % PALETTE.length;
   const c1 = color1 || PALETTE[idx][0];
@@ -47,8 +56,8 @@ export const BookCard: React.FC<BookCardProps> = ({
   if (compact) {
     return (
       <Pressable
-        onPress={onPress}
-        onLongPress={onLongPress}
+        onPress={handlePress}
+        onLongPress={handleLongPress}
         style={{
           width: 140,
           marginRight: 12,
@@ -131,8 +140,8 @@ export const BookCard: React.FC<BookCardProps> = ({
 
   return (
     <Pressable
-      onPress={onPress}
-      onLongPress={onLongPress}
+      onPress={handlePress}
+      onLongPress={handleLongPress}
       style={{
         flex: 1,
         margin: 6,
@@ -236,4 +245,4 @@ export const BookCard: React.FC<BookCardProps> = ({
       </View>
     </Pressable>
   );
-};
+});
