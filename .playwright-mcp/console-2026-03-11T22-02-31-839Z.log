@@ -1,0 +1,10 @@
+[   94707ms] Unable to resolve module ../global.css from C:\Code\Aloud\app\_layout.tsx: 
+
+None of these files exist:
+  * global.css(.web.ts|.ts|.web.tsx|.tsx|.web.mjs|.mjs|.web.js|.js|.web.jsx|.jsx|.web.json|.json|.web.cjs|.cjs|.web.scss|.scss|.web.sass|.sass|.web.css|.css)
+  * global.css
+> 1 | import '../global.css';
+    |         ^
+  2 | import { Stack, useRouter, useSegments } from 'expo-router';
+  3 | import { StatusBar } from 'expo-status-bar';
+  4 | import { useColorScheme } from 'react-native';
