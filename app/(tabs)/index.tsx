@@ -7,6 +7,7 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
@@ -60,12 +61,17 @@ export default function LibraryScreen() {
       const result = await DocumentPicker.getDocumentAsync({
         type: ['application/pdf', 'application/epub+zip', 'text/plain'],
         copyToCacheDirectory: true,
+        // On web: base64: false ensures we get a File object for reliable PDF/EPUB parsing
+        ...(Platform.OS === 'web' && { base64: false }),
       });
       if (result.canceled || !result.assets || result.assets.length === 0) return;
 
       const asset = result.assets[0];
+      // On web: prefer asset.file, fallback to result.output[0] (FileList)
       const webFile =
-        Platform.OS === 'web' ? ((asset as any).file as File | undefined) : undefined;
+        Platform.OS === 'web'
+          ? ((asset as { file?: File }).file ?? (result as { output?: FileList }).output?.[0])
+          : undefined;
 
       const loaded = await loadFromFile({
         uri: asset.uri,
@@ -87,9 +93,15 @@ export default function LibraryScreen() {
           pathname: '/(tabs)/reader',
           params: { bookId: loaded.id },
         });
+      } else {
+        Alert.alert(
+          'Import failed',
+          'Could not load the file. Try a different PDF, EPUB, or TXT file. On mobile, PDF extraction is limited — use EPUB or TXT for best results.'
+        );
       }
     } catch (e) {
       console.warn('Import failed', e);
+      Alert.alert('Import failed', 'An error occurred while loading the file. Please try again.');
     }
   };
 

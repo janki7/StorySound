@@ -11,13 +11,21 @@ export async function parsePdf(uri: string, file?: File): Promise<ParsedPdf> {
     const pdfjs = await import('pdfjs-dist');
 
     if (!pdfjs.GlobalWorkerOptions.workerSrc) {
-      pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
+      // Use jsDelivr to serve exact npm package version (cdnjs may have version mismatch)
+      pdfjs.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
     }
 
-    let source: any = uri;
+    let source: { url?: string; data?: Uint8Array } | string;
     if (file) {
       const buffer = await file.arrayBuffer();
       source = { data: new Uint8Array(buffer) };
+    } else if (typeof uri === 'string' && (uri.startsWith('blob:') || uri.startsWith('data:'))) {
+      // Blob URL or data URL: fetch and pass as ArrayBuffer
+      const res = await fetch(uri);
+      const buffer = await res.arrayBuffer();
+      source = { data: new Uint8Array(buffer) };
+    } else {
+      source = uri;
     }
 
     const loadingTask = pdfjs.getDocument(source);
